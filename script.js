@@ -82,102 +82,162 @@ function initCharts(data) {
         primary: '#005DA9',
         secondary: '#00428C',
         accent: '#0082C3',
-        background: 'rgba(0, 93, 169, 0.1)',
-        gridLines: 'rgba(88, 89, 91, 0.1)',
+        inflow: '#4CAF50',    // Couleur pour les entrées
+        outflow: '#f44336',   // Couleur pour les sorties
+        grid: 'rgba(0, 93, 169, 0.1)',
         gradient: context => {
             const gradient = context.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(0, 93, 169, 0.4)');
+            gradient.addColorStop(0, 'rgba(0, 93, 169, 0.2)');
             gradient.addColorStop(1, 'rgba(0, 93, 169, 0.0)');
             return gradient;
         }
     };
 
-    const pszChartOptions = {
-        responsive: true,
-        animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart'
-        },
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: '#58595B',
-                    font: {
-                        family: "'Source Sans Pro', sans-serif",
-                        size: 12
-                    },
-                    usePointStyle: true,
-                    boxWidth: 6,
-                    padding: 20
-                }
-            },
-            tooltip: {
-                backgroundColor: pszChartColors.primary,
-                titleColor: '#FFFFFF',
-                bodyColor: '#FFFFFF',
-                borderColor: pszChartColors.secondary,
-                borderWidth: 1
-            }
-        },
-        scales: {
-            y: {
-                grid: {
-                    color: pszChartColors.gridLines
-                },
-                ticks: {
-                    color: '#58595B'
-                }
-            },
-            x: {
-                grid: {
-                    display: false
-                },
-                ticks: {
-                    color: '#58595B'
-                }
-            }
-        },
-        hover: {
-            mode: 'nearest',
-            intersect: false,
-            animationDuration: 400
-        }
-    };
+    // Formater les données pour l'historique
+    const historyData = data.history.map(h => ({
+        x: new Date(h.date),
+        y: h.quantity
+    })).sort((a, b) => a.x - b.x);
 
-    // Update Stock History Chart
+    // Formater les mouvements pour le graphique
+    const movements = data.movements.map(m => ({
+        x: new Date(m.date),
+        y: m.quantity,
+        type: m.type
+    })).sort((a, b) => a.x - b.x);
+
+    // Graphique d'historique du stock
     const stockCtx = document.getElementById('stockHistoryChart').getContext('2d');
     new Chart(stockCtx, {
         type: 'line',
         data: {
-            labels: data.history.map(h => h.date),
             datasets: [{
                 label: 'Niveau de Stock',
-                data: data.history.map(h => h.quantity),
+                data: historyData,
                 borderColor: pszChartColors.primary,
                 backgroundColor: pszChartColors.gradient(stockCtx),
-                tension: 0.4,
-                fill: true
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
-        options: pszChartOptions
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Historique du niveau de stock',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `Stock: ${context.parsed.y} unités`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'DD/MM/YY'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantité'
+                    }
+                }
+            }
+        }
     });
 
-    // Update Consumption Chart
-    const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
-    new Chart(consumptionCtx, {
+    // Graphique des mouvements de stock
+    const movementCtx = document.getElementById('consumptionChart').getContext('2d');
+    new Chart(movementCtx, {
         type: 'bar',
         data: {
-            labels: ['J-7', 'J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1'],
-            datasets: [{
-                label: 'Consommation Journalière',
-                data: data.consumption,
-                backgroundColor: pszChartColors.secondary,
-                borderColor: pszChartColors.primary,
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: 'Entrées',
+                    data: movements.filter(m => m.type === 'in'),
+                    backgroundColor: pszChartColors.inflow,
+                    borderColor: pszChartColors.inflow,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Sorties',
+                    data: movements.filter(m => m.type === 'out'),
+                    backgroundColor: pszChartColors.outflow,
+                    borderColor: pszChartColors.outflow,
+                    borderWidth: 1
+                }
+            ]
         },
-        options: pszChartOptions
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Mouvements de Stock',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            const type = context.dataset.label === 'Entrées' ? 'Entrée' : 'Sortie';
+                            return `${type}: ${Math.abs(context.parsed.y)} unités`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'DD/MM/YY'
+                        }
+                    },
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Quantité'
+                    }
+                }
+            }
+        }
     });
 }
 

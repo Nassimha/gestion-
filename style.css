@@ -24,6 +24,9 @@
     --psz-font: 'Source Sans Pro', sans-serif;
     --psz-pattern-color: rgba(0, 93, 169, 0.03);
     --psz-gradient-overlay: linear-gradient(135deg, rgba(0, 93, 169, 0.05) 0%, rgba(0, 66, 140, 0.08) 100%);
+    --psz-gradient-blue: linear-gradient(135deg, #005DA9 0%, #0082C3 100%);
+    --psz-shadow-hover: 0 8px 24px rgba(0, 93, 169, 0.15);
+    --psz-animation-duration: 0.6s;
 }
 
 * {
@@ -52,13 +55,9 @@ body::before {
     right: 0;
     bottom: 0;
     background: 
-        var(--psz-gradient-overlay),
-        repeating-linear-gradient(45deg, 
-            var(--psz-pattern-color) 0px,
-            var(--psz-pattern-color) 2px,
-            transparent 2px,
-            transparent 10px
-        );
+        url('https://www.psz-electronic.com/assets/public/images/bg-pattern.svg') center/800px repeat,
+        var(--psz-gradient-blue);
+    opacity: 0.03;
     z-index: -1;
 }
 
@@ -245,6 +244,25 @@ label {
     background: var(--background-light);
     border-radius: 8px;
     height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+    animation: chartGlow 8s linear infinite;
+}
+
+@keyframes chartGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .history-section {
@@ -326,6 +344,18 @@ label {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
+    animation: gridFadeIn 0.8s ease-out;
+}
+
+@keyframes gridFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .panel {
@@ -336,11 +366,23 @@ label {
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     backdrop-filter: blur(5px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: panelFadeIn var(--psz-animation-duration) ease-out;
 }
 
 .panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: var(--psz-shadow-hover);
+}
+
+@keyframes panelFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .psz-layout {
@@ -357,6 +399,23 @@ label {
     padding: 1rem 0;
     position: relative;
     z-index: 10;
+    overflow: hidden;
+}
+
+.psz-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--psz-gradient-blue);
+    animation: headerGlow 3s ease-in-out infinite;
+}
+
+@keyframes headerGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 .psz-header-content {
@@ -441,4 +500,27 @@ label {
 .status-circle {
     border: 2px solid var(--psz-primary);
     color: var(--psz-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.status-circle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(400%); }
 }

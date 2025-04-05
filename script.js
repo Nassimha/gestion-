@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const alertData = {
         ref: urlParams.get('ref') || 'N/A',
+        address: urlParams.get('address') || 'N/A',  // Ajout de l'adresse
         name: urlParams.get('name') || 'N/A',
         category: urlParams.get('category') || 'N/A',
         current: parseInt(urlParams.get('current')) || 0,
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update UI with alert data
     document.getElementById('itemRef').textContent = alertData.ref;
     document.getElementById('itemName').textContent = alertData.name;
+    document.getElementById('itemAddress').textContent = alertData.address; // Assurez-vous d'avoir cet élément dans le HTML
     document.getElementById('itemCategory').textContent = alertData.category;
     document.getElementById('currentStock').textContent = alertData.current;
     document.getElementById('minStock').textContent = alertData.min;

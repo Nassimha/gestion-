@@ -267,7 +267,11 @@ label {
 
 .chart-container {
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.85) 100%
+    );
     backdrop-filter: blur(10px);
     border-radius: 8px;
     height: 300px;
@@ -410,10 +414,12 @@ label {
 .panel {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 93, 169, 0.1);
+    border: 1px solid rgba(0, 93, 169, 0.08);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 
+        0 4px 6px rgba(0, 93, 169, 0.05),
+        0 10px 15px rgba(0, 93, 169, 0.1);
     backdrop-filter: blur(5px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: panelAppear 0.6s ease-out, panelGlow 3s ease-in-out infinite;
@@ -425,16 +431,15 @@ label {
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
         transparent,
-        rgba(255, 255, 255, 0.3),
+        rgba(0, 93, 169, 0.2),
+        rgba(0, 130, 195, 0.2),
         transparent
     );
-    transition: 0.5s;
 }
 
 .panel:hover::before {
@@ -495,7 +500,9 @@ label {
 
 .psz-header {
     background: var(--psz-white);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 
+        0 4px 6px rgba(0, 93, 169, 0.05),
+        0 10px 15px rgba(0, 93, 169, 0.1);
     padding: 1rem 0;
     position: relative;
     z-index: 10;
@@ -644,6 +651,11 @@ label {
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.85) 100%
+    );
 }
 
 .status-circle:hover {
@@ -691,4 +703,25 @@ label {
 
 @keyframes shimmer {
     to { transform: translateX(100%) skewX(-20deg); }
+}
+
+@keyframes patternFloat {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 100px; }
+}
+
+@keyframes waveAnimation {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+}
+
+/* Animation des valeurs numériques */
+.detail-value {
+    animation: numberPulse 2s ease-in-out infinite;
+}
+
+@keyframes numberPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }

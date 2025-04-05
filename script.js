@@ -83,7 +83,13 @@ function initCharts(data) {
         secondary: '#00428C',
         accent: '#0082C3',
         background: 'rgba(0, 93, 169, 0.1)',
-        gridLines: 'rgba(88, 89, 91, 0.1)'
+        gridLines: 'rgba(88, 89, 91, 0.1)',
+        gradient: context => {
+            const gradient = context.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 93, 169, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 93, 169, 0.0)');
+            return gradient;
+        }
     };
 
     const pszChartOptions = {
@@ -100,7 +106,10 @@ function initCharts(data) {
                     font: {
                         family: "'Source Sans Pro', sans-serif",
                         size: 12
-                    }
+                    },
+                    usePointStyle: true,
+                    boxWidth: 6,
+                    padding: 20
                 }
             },
             tooltip: {
@@ -128,6 +137,11 @@ function initCharts(data) {
                     color: '#58595B'
                 }
             }
+        },
+        hover: {
+            mode: 'nearest',
+            intersect: false,
+            animationDuration: 400
         }
     };
 
@@ -141,7 +155,7 @@ function initCharts(data) {
                 label: 'Niveau de Stock',
                 data: data.history.map(h => h.quantity),
                 borderColor: pszChartColors.primary,
-                backgroundColor: pszChartColors.background,
+                backgroundColor: pszChartColors.gradient(stockCtx),
                 tension: 0.4,
                 fill: true
             }]
@@ -243,3 +257,25 @@ function initPSZStyles() {
     Chart.defaults.font.family = "'Source Sans Pro', sans-serif";
     Chart.defaults.plugins.tooltip.backgroundColor = '#005DA9';
 }
+
+// Ajouter des animations aux panneaux
+document.querySelectorAll('.panel').forEach(panel => {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'panelSlideUp 0.6s ease forwards';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    observer.observe(panel);
+});
+
+// Ajouter des effets de parallaxe
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    document.querySelectorAll('.chart-container').forEach(container => {
+        const speed = 0.5;
+        container.style.transform = `translateY(${scrolled * speed}px)`;
+    });
+});

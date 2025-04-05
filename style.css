@@ -27,6 +27,9 @@
     --psz-gradient-blue: linear-gradient(135deg, #005DA9 0%, #0082C3 100%);
     --psz-shadow-hover: 0 8px 24px rgba(0, 93, 169, 0.15);
     --psz-animation-duration: 0.6s;
+    --psz-pattern-size: 50px;
+    --psz-pattern-opacity: 0.03;
+    --psz-animation-speed: 20s;
 }
 
 * {
@@ -55,10 +58,33 @@ body::before {
     right: 0;
     bottom: 0;
     background: 
-        url('https://www.psz-electronic.com/assets/public/images/bg-pattern.svg') center/800px repeat,
-        var(--psz-gradient-blue);
-    opacity: 0.03;
+        radial-gradient(circle at 0% 0%, var(--psz-accent) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, var(--psz-primary) 0%, transparent 50%),
+        repeating-linear-gradient(45deg,
+            var(--psz-pattern-color) 0px,
+            var(--psz-pattern-color) 2px,
+            transparent 2px,
+            transparent var(--psz-pattern-size)
+        ),
+        repeating-linear-gradient(-45deg,
+            var(--psz-pattern-color) 0px,
+            var(--psz-pattern-color) 2px,
+            transparent 2px,
+            transparent var(--psz-pattern-size)
+        );
+    opacity: var(--psz-pattern-opacity);
     z-index: -1;
+    animation: backgroundFlow var(--psz-animation-speed) linear infinite;
+}
+
+@keyframes backgroundFlow {
+    0% {
+        background-position: 0% 0%, 100% 100%, 0 0, 0 0;
+    }
+    100% {
+        background-position: 100% 100%, 0% 0%, var(--psz-pattern-size) var(--psz-pattern-size), 
+                           calc(-1 * var(--psz-pattern-size)) calc(-1 * var(--psz-pattern-size));
+    }
 }
 
 .global-container {
@@ -241,7 +267,8 @@ label {
 
 .chart-container {
     padding: 1rem;
-    background: var(--background-light);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
     border-radius: 8px;
     height: 300px;
     position: relative;
@@ -260,9 +287,29 @@ label {
     animation: chartGlow 8s linear infinite;
 }
 
+.chart-container::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle, 
+            rgba(0, 93, 169, 0.1) 0%, 
+            transparent 70%
+        );
+    animation: chartRotate 15s linear infinite;
+}
+
 @keyframes chartGlow {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes chartRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .history-section {
@@ -359,14 +406,15 @@ label {
 }
 
 .panel {
-    background: var(--psz-white);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 93, 169, 0.1);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     backdrop-filter: blur(5px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: panelFadeIn var(--psz-animation-duration) ease-out;
+    animation: panelAppear 0.6s ease-out, panelGlow 3s ease-in-out infinite;
 }
 
 .panel:hover {
@@ -383,6 +431,22 @@ label {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes panelAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes panelGlow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(0, 93, 169, 0.1); }
+    50% { box-shadow: 0 4px 20px rgba(0, 93, 169, 0.2); }
 }
 
 .psz-layout {
@@ -413,9 +477,29 @@ label {
     animation: headerGlow 3s ease-in-out infinite;
 }
 
+.psz-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--psz-primary),
+        var(--psz-accent),
+        var(--psz-primary)
+    );
+    background-size: 200% 100%;
+    animation: headerGradient 3s linear infinite;
+}
+
 @keyframes headerGlow {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
+}
+
+@keyframes headerGradient {
+    to { background-position: 200% 0; }
 }
 
 .psz-header-content {
@@ -520,7 +604,28 @@ label {
     animation: shimmer 2s infinite;
 }
 
+.status-circle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+    transform: skewX(-20deg);
+}
+
 @keyframes shimmer {
     0% { transform: translateX(0); }
     100% { transform: translateX(400%); }
+}
+
+@keyframes shimmer {
+    to { transform: translateX(100%) skewX(-20deg); }
 }

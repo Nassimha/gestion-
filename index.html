@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSZ Electronic - Alerte Stock</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="theme-color" content="#005DA9">
+    <link rel="preload" href="https://www.psz-electronic.com/assets/public/images/psz-logo-rgb.svg" as="image">
+</head>
+<body>
+    <div class="psz-layout">
+        <header class="psz-header">
+            <div class="psz-header-content">
+                <a href="https://www.psz-electronic.com" class="psz-logo-link">
+                    <img src="https://www.psz-electronic.com/assets/public/images/psz-logo-rgb.svg" 
+                         alt="PSZ Logo" 
+                         class="psz-logo"
+                         loading="eager">
+                </a>
+                <h1>Gestion de Stock</h1>
+            </div>
+        </header>
+
+        <main class="psz-main">
+            <div class="psz-breadcrumb">
+                <span>PSZ Electronic</span>
+                <span>›</span>
+                <span>Alertes Stock</span>
+            </div>
+
+            <div class="psz-alert-details">
+                <div class="alert-banner" id="alertBanner">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <h2>Alerte Stock Critique</h2>
+                        <p class="timestamp" id="alertTime"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="psz-grid">
+                <div class="dashboard-grid">
+                    <!-- Information Panel -->
+                    <div class="panel product-info">
+                        <h3>Information Produit</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Référence</label>
+                                <span id="itemRef" class="value"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Nom</label>
+                                <span id="itemName" class="value"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Catégorie</label>
+                                <span id="itemCategory" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Status Panel -->
+                    <div class="panel stock-status">
+                        <h3>État du Stock</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-circle">
+                                    <span id="currentStock" class="large-number"></span>
+                                    <span class="label">Stock Actuel</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-circle warning">
+                                    <span id="minStock" class="large-number"></span>
+                                    <span class="label">Seuil Minimum</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-circle success">
+                                    <span id="maxStock" class="large-number"></span>
+                                    <span class="label">Stock Maximum</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-container">
+                                <div class="progress-bar" id="stockProgress"></div>
+                            </div>
+                            <span class="progress-label" id="stockLevel">Niveau de stock</span>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="panel charts-section">
+                        <h3>Analyse du Stock</h3>
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <canvas id="stockHistoryChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="consumptionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Section -->
+                    <div class="panel movement-section">
+                        <h3>Historique des Mouvements</h3>
+                        <div class="movement-list" id="movementList"></div>
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Forecast Section -->
+                    <div class="panel forecast-section">
+                        <h3>Prévisions & Recommandations</h3>
+                        <div class="forecast-content psz-themed">
+                            <div class="forecast-metrics" id="forecastDetails"></div>
+                            <div class="recommendations">
+                                <h4>Actions Recommandées</h4>
+                                <ul id="recommendationsList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="psz-footer">
+            <div class="psz-footer-content">
+                © PSZ electronic GmbH 
+                <span id="currentYear"></span>
+            </div>
+            <div class="psz-contact">
+                <a href="mailto:contact@psz-electronic.com">Contact</a>
+                <a href="https://www.psz-electronic.com">www.psz-electronic.com</a>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

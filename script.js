@@ -78,33 +78,39 @@ function updateCurrentTime() {
 
 // Améliorer l'initialisation des graphiques
 function initCharts(data) {
-    const pszChartColors = {
-        primary: '#005DA9',
-        secondary: '#00428C',
-        accent: '#0082C3',
-        inflow: '#4CAF50',    // Couleur pour les entrées
-        outflow: '#f44336',   // Couleur pour les sorties
-        grid: 'rgba(0, 93, 169, 0.1)',
-        gradient: context => {
-            const gradient = context.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(0, 93, 169, 0.2)');
-            gradient.addColorStop(1, 'rgba(0, 93, 169, 0.0)');
-            return gradient;
+    // Vérifier et parser les données d'historique
+    let historyData = [];
+    try {
+        if (typeof data.history === 'string') {
+            historyData = JSON.parse(data.history);
+        } else {
+            historyData = data.history;
         }
+    } catch (e) {
+        console.error('Erreur parsing historique:', e);
+        historyData = [];
+    }
+
+    // Vérifier et parser les données de mouvements
+    let movementsData = [];
+    try {
+        if (typeof data.movements === 'string') {
+            movementsData = JSON.parse(data.movements);
+        } else {
+            movementsData = data.movements;
+        }
+    } catch (e) {
+        console.error('Erreur parsing mouvements:', e);
+        movementsData = [];
+    }
+
+    // Configuration des couleurs
+    const chartColors = {
+        stockLine: '#005DA9',
+        inFlow: '#4CAF50',
+        outFlow: '#f44336',
+        grid: '#E5E5E5',
     };
-
-    // Formater les données pour l'historique
-    const historyData = data.history.map(h => ({
-        x: new Date(h.date),
-        y: h.quantity
-    })).sort((a, b) => a.x - b.x);
-
-    // Formater les mouvements pour le graphique
-    const movements = data.movements.map(m => ({
-        x: new Date(m.date),
-        y: m.quantity,
-        type: m.type
-    })).sort((a, b) => a.x - b.x);
 
     // Graphique d'historique du stock
     const stockCtx = document.getElementById('stockHistoryChart').getContext('2d');
@@ -113,37 +119,19 @@ function initCharts(data) {
         data: {
             datasets: [{
                 label: 'Niveau de Stock',
-                data: historyData,
-                borderColor: pszChartColors.primary,
-                backgroundColor: pszChartColors.gradient(stockCtx),
-                tension: 0.3,
+                data: historyData.map(h => ({
+                    x: new Date(h.date),
+                    y: h.quantity
+                })),
+                borderColor: chartColors.stockLine,
                 fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6
+                tension: 0.4,
+                backgroundColor: 'rgba(0, 93, 169, 0.1)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Historique du niveau de stock',
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        label: function(context) {
-                            return `Stock: ${context.parsed.y} unités`;
-                        }
-                    }
-                }
-            },
             scales: {
                 x: {
                     type: 'time',
@@ -153,23 +141,27 @@ function initCharts(data) {
                             day: 'DD/MM/YY'
                         }
                     },
-                    title: {
-                        display: true,
-                        text: 'Date'
+                    grid: {
+                        color: chartColors.grid
                     }
                 },
                 y: {
                     beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Quantité'
+                    grid: {
+                        color: chartColors.grid
                     }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
                 }
             }
         }
     });
 
-    // Graphique des mouvements de stock
+    // Graphique des mouvements
     const movementCtx = document.getElementById('consumptionChart').getContext('2d');
     new Chart(movementCtx, {
         type: 'bar',
@@ -177,63 +169,39 @@ function initCharts(data) {
             datasets: [
                 {
                     label: 'Entrées',
-                    data: movements.filter(m => m.type === 'in'),
-                    backgroundColor: pszChartColors.inflow,
-                    borderColor: pszChartColors.inflow,
-                    borderWidth: 1
+                    data: movementsData.filter(m => m.type === 'in').map(m => ({
+                        x: new Date(m.date),
+                        y: m.quantity
+                    })),
+                    backgroundColor: chartColors.inFlow,
+                    stack: 'stack0'
                 },
                 {
                     label: 'Sorties',
-                    data: movements.filter(m => m.type === 'out'),
-                    backgroundColor: pszChartColors.outflow,
-                    borderColor: pszChartColors.outflow,
-                    borderWidth: 1
+                    data: movementsData.filter(m => m.type === 'out').map(m => ({
+                        x: new Date(m.date),
+                        y: -m.quantity // Valeur négative pour les sorties
+                    })),
+                    backgroundColor: chartColors.outFlow,
+                    stack: 'stack0'
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Mouvements de Stock',
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        label: function(context) {
-                            const type = context.dataset.label === 'Entrées' ? 'Entrée' : 'Sortie';
-                            return `${type}: ${Math.abs(context.parsed.y)} unités`;
-                        }
-                    }
-                }
-            },
             scales: {
                 x: {
                     type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'DD/MM/YY'
-                        }
-                    },
                     stacked: true,
-                    title: {
-                        display: true,
-                        text: 'Date'
+                    time: {
+                        unit: 'day'
                     }
                 },
                 y: {
                     stacked: true,
-                    title: {
-                        display: true,
-                        text: 'Quantité'
+                    grid: {
+                        color: chartColors.grid
                     }
                 }
             }

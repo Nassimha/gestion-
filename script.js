@@ -290,8 +290,11 @@ function initCharts(data) {
                     backgroundColor: 'rgba(25, 118, 210, 0.1)',
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
+                    pointRadius: 5,                    // Augmenter la taille des points
+                    pointHoverRadius: 8,              // Augmenter la taille au survol
+                    borderWidth: 3,                   // Augmenter l'épaisseur de la ligne
+                    pointBackgroundColor: '#ffffff',  // Points blancs
+                    pointBorderColor: '#1976d2'      // Bordure bleue pour les points
                 }]
             },
             options: {
@@ -304,7 +307,8 @@ function initCharts(data) {
                             color: '#333',
                             padding: 20,
                             font: {
-                                size: 12
+                                size: 14,
+                                weight: 'bold'
                             }
                         }
                     },
@@ -315,7 +319,8 @@ function initCharts(data) {
                         font: {
                             size: 16,
                             weight: 'bold'
-                        }
+                        },
+                        padding: 20
                     }
                 },
                 scales: {
@@ -327,24 +332,70 @@ function initCharts(data) {
                                 day: 'DD/MM'
                             }
                         },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: true
+                        },
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: '#666',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
                         },
                         ticks: {
-                            color: '#666'
+                            color: '#666',
+                            font: {
+                                size: 12
+                            }
                         }
                     },
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: true
+                        },
                         title: {
                             display: true,
-                            text: 'Quantité'
+                            text: 'Quantité en stock',
+                            color: '#666',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
                         },
                         ticks: {
-                            color: '#666'
+                            color: '#666',
+                            font: {
+                                size: 12
+                            },
+                            stepSize: 1  // Pour avoir des nombres entiers
                         }
                     }
+                },
+                elements: {
+                    line: {
+                        tension: 0.4,  // Courbe plus lisse
+                        borderWidth: 3  // Ligne plus épaisse
+                    },
+                    point: {
+                        radius: 5,  // Points plus gros
+                        hoverRadius: 8,
+                        borderWidth: 2
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
                 }
             }
         });

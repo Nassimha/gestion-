@@ -21,7 +21,7 @@
     --psz-error: #D32F2F;        /* Rouge erreur */
     --psz-warning: #FFA000;      /* Orange warning */
     --psz-success: #388E3C;      /* Vert succès */
-    --psz-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --psz-font: 'Source Sans Pro', sans-serif;
     --psz-pattern-color: rgba(0, 93, 169, 0.03);
     --psz-gradient-overlay: linear-gradient(135deg, rgba(0, 93, 169, 0.05) 0%, rgba(0, 66, 140, 0.08) 100%);
     --psz-gradient-blue: linear-gradient(135deg, #005DA9 0%, #0082C3 100%);
@@ -30,24 +30,6 @@
     --psz-pattern-size: 50px;
     --psz-pattern-opacity: 0.03;
     --psz-animation-speed: 20s;
-
-    /* PSZ Official Colors */
-    --psz-blue-primary: #004B87;
-    --psz-blue-secondary: #0082BE;
-    --psz-blue-light: #E6F3F9;
-    --psz-gray-dark: #333333;
-    --psz-gray-medium: #666666;
-    --psz-gray-light: #F5F5F5;
-    --psz-white: #FFFFFF;
-    
-    /* PSZ Gradients */
-    --psz-gradient-primary: linear-gradient(135deg, var(--psz-blue-primary), var(--psz-blue-secondary));
-    --psz-gradient-light: linear-gradient(135deg, var(--psz-blue-light) 0%, var(--psz-white) 100%);
-    
-    /* PSZ Shadows */
-    --psz-shadow-sm: 0 2px 4px rgba(0, 75, 135, 0.1);
-    --psz-shadow-md: 0 4px 8px rgba(0, 75, 135, 0.15);
-    --psz-shadow-lg: 0 8px 16px rgba(0, 75, 135, 0.2);
 }
 
 * {
@@ -60,7 +42,7 @@ body {
     font-family: var(--psz-font);
     margin: 0;
     padding: 0;
-    background: var(--psz-white);
+    background: #ffffff;
     position: relative;
     overflow-x: hidden;
     color: var(--psz-gray);
@@ -76,10 +58,21 @@ body::before {
     right: 0;
     bottom: 0;
     background: 
-        linear-gradient(135deg, var(--psz-blue-light) 0%, transparent 100%),
-        radial-gradient(circle at 0% 0%, var(--psz-blue-light) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, var(--psz-blue-light) 0%, transparent 50%);
-    opacity: 0.7;
+        radial-gradient(circle at 0% 0%, var(--psz-accent) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, var(--psz-primary) 0%, transparent 50%),
+        repeating-linear-gradient(45deg,
+            var(--psz-pattern-color) 0px,
+            var(--psz-pattern-color) 2px,
+            transparent 2px,
+            transparent var(--psz-pattern-size)
+        ),
+        repeating-linear-gradient(-45deg,
+            var(--psz-pattern-color) 0px,
+            var(--psz-pattern-color) 2px,
+            transparent 2px,
+            transparent var(--psz-pattern-size)
+        );
+    opacity: var(--psz-pattern-opacity);
     z-index: -1;
     animation: backgroundFlow var(--psz-animation-speed) linear infinite;
 }
@@ -274,14 +267,17 @@ label {
 
 .chart-container {
     padding: 1rem;
-    background: linear-gradient(135deg, var(--psz-white) 0%, var(--psz-blue-light) 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.85) 100%
+    );
     backdrop-filter: blur(10px);
     border-radius: 8px;
     height: 300px;
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease-out;
-    box-shadow: var(--psz-shadow-sm);
 }
 
 .chart-container::before {
@@ -416,7 +412,7 @@ label {
 }
 
 .panel {
-    background: var(--psz-white);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 93, 169, 0.08);
     border-radius: 8px;
@@ -429,7 +425,6 @@ label {
     animation: panelAppear 0.6s ease-out, panelGlow 3s ease-in-out infinite;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--psz-shadow-md);
 }
 
 .panel::before {
@@ -452,8 +447,8 @@ label {
 }
 
 .panel:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--psz-shadow-lg);
+    transform: translateY(-4px);
+    box-shadow: var(--psz-shadow-hover);
 }
 
 @keyframes panelFadeIn {
@@ -504,8 +499,7 @@ label {
 }
 
 .psz-header {
-    background: white;
-    border-bottom: 2px solid var(--psz-primary);
+    background: var(--psz-white);
     box-shadow: 
         0 4px 6px rgba(0, 93, 169, 0.05),
         0 10px 15px rgba(0, 93, 169, 0.1);
@@ -569,9 +563,7 @@ label {
 }
 
 .psz-logo {
-    width: 120px;
     height: 40px;
-    object-fit: contain;
 }
 
 .psz-header h1 {
@@ -617,12 +609,10 @@ label {
 }
 
 .panel h3 {
-    color: var(--psz-blue-primary);
+    color: var(--psz-primary);
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    border-bottom: 2px solid var(--psz-blue-light);
-    padding-bottom: 0.5rem;
 }
 
 .psz-footer {
@@ -792,56 +782,4 @@ label {
 .chart-container:hover {
     transform: translateY(-5px);
     box-shadow: var(--psz-shadow-hover);
-}
-
-/* Ajouter un style pour le menu langue */
-.language-selector {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.language-selector a {
-    color: var(--psz-gray);
-    text-decoration: none;
-    padding: 0.25rem 0.5rem;
-}
-
-.language-selector a:hover {
-    color: var(--psz-primary);
-}
-
-.language-selector a.active {
-    color: var(--psz-primary);
-    font-weight: 600;
-}
-
-/* Ajouter des styles pour améliorer l'accessibilité */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-/* Ajouter le support pour l'impression */
-@media print {
-    .psz-pattern,
-    .wave-container {
-        display: none;
-    }
-    
-    body {
-        background: white;
-    }
-    
-    .chart-container {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
 }

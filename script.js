@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
         min: parseInt(decodeJsonParam(urlParams.get('min'))) || 0,
         max: parseInt(decodeJsonParam(urlParams.get('max'))) || 0,
         timestamp: decodeJsonParam(urlParams.get('time')) || new Date().toISOString(),
+        stock_curve: decodeJsonParam(urlParams.get('stock_curve')) || [],
         history: decodeJsonParam(urlParams.get('history')) || [],
         consumption: decodeJsonParam(urlParams.get('consumption')) || [],
         movements: decodeJsonParam(urlParams.get('movements')) || []
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         itemRef: alertData.ref || 'N/A',
         itemName: alertData.name || 'N/A',
         itemAddress: alertData.address || 'N/A',
-        itemCategory: alertData.category || 'N/A',
+        itemCategory: alertData.category || 'Non catégorisé',  // Valeur par défaut modifiée
         currentStock: alertData.current,
         minStock: alertData.min,
         maxStock: alertData.max,
@@ -258,12 +259,10 @@ function initCharts(data) {
     new Chart(trendsCtx, {
         type: 'line',
         data: {
+            labels: Array.from({length: stockCurveData.length}, (_, i) => i + 1),
             datasets: [{
                 label: 'Évolution du stock',
-                data: data.history.map(h => ({
-                    x: new Date(h.date),
-                    y: h.quantity
-                })),
+                data: stockCurveData,
                 borderColor: '#1976d2',
                 fill: true,
                 tension: 0.4,

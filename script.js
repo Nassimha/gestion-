@@ -221,116 +221,154 @@ function initCharts(data) {
         }
     });
 
-    // Avant de créer le graphique de catégorie, assurons-nous d'avoir les données
-    let stockCurveData = [];
-    try {
-        stockCurveData = Array.isArray(data.stock_curve) ? data.stock_curve.map(Number) : [];
-    } catch (e) {
-        console.error('Erreur lors du parsing de stock_curve:', e);
-        stockCurveData = [];
-    }
-
-    // Créer des données pour le donut chart
-    const categoryCtx = document.getElementById('categoryStockChart').getContext('2d');
-    const categoryChart = new Chart(categoryCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
-            datasets: [{
-                data: [
-                    data.current || 0,
-                    data.min || 0,
-                    Math.max(0, (data.max || 0) - (data.current || 0))
-                ],
-                backgroundColor: [
-                    '#1976d2',  // Bleu pour stock actuel
-                    '#f44336',  // Rouge pour minimum
-                    '#4CAF50'   // Vert pour disponible
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `Répartition du Stock - ${data.category || 'Non catégorisé'}`,
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Graphique des tendances avec les données de l'historique
-    const trendsCtx = document.getElementById('categoryTrendsChart').getContext('2d');
-    const dates = stockCurveData.map((_, index) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (stockCurveData.length - index - 1));
-        return date;
-    });
-
-    const trendsChart = new Chart(trendsCtx, {
-        type: 'line',
-        data: {
-            labels: dates,
-            datasets: [{
-                label: 'Évolution du stock',
-                data: stockCurveData,
-                borderColor: '#1976d2',
-                fill: true,
-                tension: 0.4,
-                backgroundColor: 'rgba(25, 118, 210, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `Tendances - ${data.category || 'Non catégorisé'}`,
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                }
+    // Graphique de répartition du stock
+    const categoryCtx = document.getElementById('categoryStockChart');
+    if (categoryCtx) {
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
+                datasets: [{
+                    data: [
+                        data.current,
+                        data.min,
+                        Math.max(0, data.max - data.current)
+                    ],
+                    backgroundColor: [
+                        '#1976d2',  // Bleu pour stock actuel
+                        '#f44336',  // Rouge pour minimum
+                        '#4CAF50'   // Vert pour disponible
+                    ],
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.5)'
+                }]
             },
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'DD/MM'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#333',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
                         }
                     },
                     title: {
                         display: true,
-                        text: 'Date'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Quantité'
+                        text: 'Répartition du Stock',
+                        color: '#333',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
+
+    // Graphique des tendances
+    const trendsCtx = document.getElementById('categoryTrendsChart');
+    if (trendsCtx) {
+        // Préparer les données d'historique
+        const historyData = data.history || [];
+        const dates = historyData.map(h => new Date(h.date));
+        const quantities = historyData.map(h => h.quantity);
+
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Niveau de stock',
+                    data: quantities,
+                    borderColor: '#1976d2',
+                    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#333',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Évolution du Stock',
+                        color: '#333',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'DD/MM'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        },
+                        ticks: {
+                            color: '#666'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantité'
+                        },
+                        ticks: {
+                            color: '#666'
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     updateCategoryMetrics(data);
+}
+
+// Ajouter une fonction pour mettre à jour les graphiques
+function updateCharts(newData) {
+    const charts = Object.values(Chart.instances);
+    charts.forEach(chart => {
+        if (chart.canvas.id === 'categoryStockChart') {
+            chart.data.datasets[0].data = [
+                newData.current,
+                newData.min,
+                Math.max(0, newData.max - newData.current)
+            ];
+        } else if (chart.canvas.id === 'categoryTrendsChart' && newData.history) {
+            chart.data.labels = newData.history.map(h => new Date(h.date));
+            chart.data.datasets[0].data = newData.history.map(h => h.quantity);
+        }
+        chart.update();
+    });
 }
 
 function updateCategoryMetrics(data) {

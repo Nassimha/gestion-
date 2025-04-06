@@ -725,3 +725,61 @@ label {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
+
+.stock-analysis {
+    background: var(--psz-white);
+    margin-top: 2rem;
+}
+
+.category-details {
+    margin-top: 2rem;
+}
+
+.category-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.metric-item {
+    background: rgba(0, 93, 169, 0.05);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-item label {
+    color: var(--psz-gray);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--psz-primary);
+    margin-top: 0.5rem;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 93, 169, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--psz-shadow-hover);
+}

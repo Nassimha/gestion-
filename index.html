@@ -104,6 +104,38 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Nouvelles sections pour les graphiques d'analyse -->
+                    <div class="panel stock-analysis">
+                        <h3>Analyse du Stock par Catégorie</h3>
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <canvas id="categoryStockChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryTrendsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section d'analyse détaillée -->
+                    <div class="panel category-details">
+                        <h3>Détails de la Catégorie</h3>
+                        <div class="category-metrics">
+                            <div class="metric-item">
+                                <label>Stock total de la catégorie</label>
+                                <div id="categoryTotalStock" class="metric-value"></div>
+                            </div>
+                            <div class="metric-item">
+                                <label>Moyenne de consommation</label>
+                                <div id="categoryAvgConsumption" class="metric-value"></div>
+                            </div>
+                            <div class="metric-item">
+                                <label>Prévision rupture</label>
+                                <div id="categoryStockout" class="metric-value"></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Stock Status Panel -->
                     <div class="panel stock-status">

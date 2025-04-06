@@ -219,6 +219,105 @@ function initCharts(data) {
             }
         }
     });
+
+    // Nouveau graphique pour l'analyse par catégorie
+    const categoryCtx = document.getElementById('categoryStockChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
+            datasets: [{
+                data: [
+                    data.current,
+                    data.min,
+                    Math.max(0, data.max - data.current)
+                ],
+                backgroundColor: [
+                    '#1976d2',
+                    '#f44336',
+                    '#4CAF50'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Répartition du Stock'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Graphique des tendances par catégorie
+    const trendsCtx = document.getElementById('categoryTrendsChart').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Évolution du stock',
+                data: data.history.map(h => ({
+                    x: new Date(h.date),
+                    y: h.quantity
+                })),
+                borderColor: '#1976d2',
+                fill: true,
+                tension: 0.4,
+                backgroundColor: 'rgba(25, 118, 210, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tendances de la Catégorie'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'DD/MM/YY'
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Mise à jour des métriques de catégorie
+    updateCategoryMetrics(data);
+}
+
+function updateCategoryMetrics(data) {
+    // Calculer et afficher les métriques de la catégorie
+    const categoryTotalStock = document.getElementById('categoryTotalStock');
+    const categoryAvgConsumption = document.getElementById('categoryAvgConsumption');
+    const categoryStockout = document.getElementById('categoryStockout');
+
+    if (categoryTotalStock) {
+        categoryTotalStock.textContent = `${data.current} unités`;
+    }
+
+    if (categoryAvgConsumption) {
+        const avgConsumption = calculateAverageConsumption(data);
+        categoryAvgConsumption.textContent = `${avgConsumption} unités/jour`;
+    }
+
+    if (categoryStockout) {
+        const daysUntilCritical = calculateDaysUntilCritical(data);
+        categoryStockout.textContent = `${daysUntilCritical} jours`;
+    }
 }
 
 // Ajouter des animations pour les mouvements

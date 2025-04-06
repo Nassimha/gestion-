@@ -105,6 +105,14 @@ function initCharts(data) {
     // Vérification et préparation des données
     console.log("Data received:", data); // Debug log
 
+    // Dimensions fixes pour les conteneurs de graphiques
+    document.querySelectorAll('.chart-container').forEach(container => {
+        container.style.height = '300px';
+        container.style.width = '100%';
+        container.style.minHeight = '300px';
+        container.style.position = 'relative';
+    });
+
     // Convertir et valider les données d'historique
     let historyData = [];
     try {
@@ -242,9 +250,9 @@ function initCharts(data) {
                 labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
                 datasets: [{
                     data: [
-                        data.current || 0,
-                        data.min || 0,
-                        Math.max(0, (data.max || 0) - (data.current || 0))
+                        parseInt(data.current) || 0,
+                        parseInt(data.min) || 0,
+                        Math.max(0, (parseInt(data.max) || 0) - (parseInt(data.current) || 0))
                     ],
                     backgroundColor: [
                         '#1976d2',
@@ -262,7 +270,18 @@ function initCharts(data) {
                         position: 'bottom',
                         labels: {
                             padding: 20,
-                            font: { size: 12 }
+                            font: { size: 12 },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => ({
+                                        text: `${label}: ${data.datasets[0].data[i]}`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        index: i
+                                    }));
+                                }
+                                return [];
+                            }
                         }
                     },
                     title: {
@@ -278,9 +297,20 @@ function initCharts(data) {
     // Graphique des tendances
     const trendsCtx = document.getElementById('categoryTrendsChart');
     if (trendsCtx) {
+        // Convertir et valider stock_curve
+        let stockCurveData = [];
+        try {
+            stockCurveData = Array.isArray(data.stock_curve) ? 
+                data.stock_curve.map(Number) : 
+                JSON.parse(data.stock_curve).map(Number);
+        } catch (e) {
+            console.error("Error parsing stock_curve:", e);
+            stockCurveData = [];
+        }
+
         // Générer des dates pour l'axe X
         const dates = Array.from({length: stockCurveData.length}, (_, i) => {
-            let date = new Date();
+            const date = new Date();
             date.setDate(date.getDate() - (stockCurveData.length - i - 1));
             return date;
         });
@@ -304,6 +334,10 @@ function initCharts(data) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -311,7 +345,7 @@ function initCharts(data) {
                         padding: 20,
                         font: { size: 16, weight: 'bold' }
                     },
-                    legend: { display: false }
+                    legend: { display: true }
                 },
                 scales: {
                     x: {
@@ -323,6 +357,11 @@ function initCharts(data) {
                         grid: {
                             display: true,
                             color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            source: 'auto',
+                            maxRotation: 45,
+                            autoSkip: true
                         }
                     },
                     y: {
@@ -330,6 +369,9 @@ function initCharts(data) {
                         grid: {
                             display: true,
                             color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            stepSize: 1
                         }
                     }
                 }

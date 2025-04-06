@@ -261,61 +261,32 @@ label {
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
+    gap: 2rem;
     margin-top: 1rem;
+    min-height: 300px;
 }
 
 .chart-container {
-    padding: 1rem;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(255, 255, 255, 0.85) 100%
-    );
-    backdrop-filter: blur(10px);
-    border-radius: 8px;
-    height: 300px;
     position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease-out;
+    height: 300px !important;
+    width: 100% !important;
+    min-height: 300px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 93, 169, 0.1);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.chart-container::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(0, 93, 169, 0.1),
-        rgba(0, 130, 195, 0.1)
-    );
-    mask: linear-gradient(black, transparent);
-    -webkit-mask: linear-gradient(black, transparent);
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-.chart-container::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: 
-        radial-gradient(circle, 
-            rgba(0, 93, 169, 0.1) 0%, 
-            transparent 70%
-        );
-    animation: chartRotate 15s linear infinite;
-}
-
-@keyframes chartGlow {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes chartRotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.panel.stock-analysis {
+    grid-column: span 2;
+    min-height: 400px;
 }
 
 .history-section {
@@ -765,21 +736,30 @@ label {
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
     margin-top: 1rem;
+    min-height: 300px;
 }
 
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 300px !important;
+    width: 100% !important;
+    min-height: 300px;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 8px;
     border: 1px solid rgba(0, 93, 169, 0.1);
     transition: transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.chart-container:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--psz-shadow-hover);
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.panel.stock-analysis {
+    grid-column: span 2;
+    min-height: 400px;
 }

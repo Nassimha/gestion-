@@ -2,28 +2,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get alert data from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const alertData = {
-        ref: urlParams.get('ref') || 'N/A',
-        address: urlParams.get('address') || 'N/A',  // Ajout de l'adresse
-        name: urlParams.get('name') || 'N/A',
-        category: urlParams.get('category') || 'N/A',
-        current: parseInt(urlParams.get('current')) || 0,
-        min: parseInt(urlParams.get('min')) || 0,
-        max: parseInt(urlParams.get('max')) || 0,
-        timestamp: urlParams.get('time') || new Date().toISOString(),
-        history: JSON.parse(urlParams.get('history') || '[]'),
-        consumption: JSON.parse(urlParams.get('consumption') || '[]'),
-        movements: JSON.parse(urlParams.get('movements') || '[]')
+        ref: decodeJsonParam(urlParams.get('ref')),
+        address: decodeJsonParam(urlParams.get('address')),
+        name: decodeJsonParam(urlParams.get('name')),
+        category: decodeJsonParam(urlParams.get('category')),
+        current: parseInt(decodeJsonParam(urlParams.get('current'))) || 0,
+        min: parseInt(decodeJsonParam(urlParams.get('min'))) || 0,
+        max: parseInt(decodeJsonParam(urlParams.get('max'))) || 0,
+        timestamp: decodeJsonParam(urlParams.get('time')) || new Date().toISOString(),
+        history: decodeJsonParam(urlParams.get('history')) || [],
+        consumption: decodeJsonParam(urlParams.get('consumption')) || [],
+        movements: decodeJsonParam(urlParams.get('movements')) || []
     };
 
+    // Helper function to decode JSON parameters
+    function decodeJsonParam(param) {
+        if (!param) return null;
+        try {
+            return JSON.parse(decodeURIComponent(param));
+        } catch (e) {
+            console.error('Error parsing parameter:', e);
+            return param;
+        }
+    }
+
     // Update UI with alert data
-    document.getElementById('itemRef').textContent = alertData.ref;
-    document.getElementById('itemName').textContent = alertData.name;
-    document.getElementById('itemAddress').textContent = alertData.address; // Assurez-vous d'avoir cet élément dans le HTML
-    document.getElementById('itemCategory').textContent = alertData.category;
-    document.getElementById('currentStock').textContent = alertData.current;
-    document.getElementById('minStock').textContent = alertData.min;
-    document.getElementById('maxStock').textContent = alertData.max;
-    document.getElementById('alertTime').textContent = new Date(alertData.timestamp).toLocaleString();
+    const elements = {
+        itemRef: alertData.ref || 'N/A',
+        itemName: alertData.name || 'N/A',
+        itemAddress: alertData.address || 'N/A',
+        itemCategory: alertData.category || 'N/A',
+        currentStock: alertData.current,
+        minStock: alertData.min,
+        maxStock: alertData.max,
+        alertTime: new Date(alertData.timestamp).toLocaleString()
+    };
+
+    // Update all elements
+    Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    });
 
     // Calculate and update progress bar
     const stockRatio = (alertData.current / alertData.max) * 100;
@@ -80,31 +101,20 @@ function updateCurrentTime() {
 
 // Améliorer l'initialisation des graphiques
 function initCharts(data) {
-    // Vérifier et parser les données d'historique
-    let historyData = [];
-    try {
-        if (typeof data.history === 'string') {
-            historyData = JSON.parse(data.history);
-        } else {
-            historyData = data.history;
-        }
-    } catch (e) {
-        console.error('Erreur parsing historique:', e);
-        historyData = [];
-    }
+    // Vérifier et convertir les données d'historique
+    let historyData = Array.isArray(data.history) ? data.history : [];
+    historyData = historyData.map(h => ({
+        date: new Date(h.date),
+        quantity: parseInt(h.quantity) || 0
+    }));
 
-    // Vérifier et parser les données de mouvements
-    let movementsData = [];
-    try {
-        if (typeof data.movements === 'string') {
-            movementsData = JSON.parse(data.movements);
-        } else {
-            movementsData = data.movements;
-        }
-    } catch (e) {
-        console.error('Erreur parsing mouvements:', e);
-        movementsData = [];
-    }
+    // Vérifier et convertir les données de mouvements
+    let movementsData = Array.isArray(data.movements) ? data.movements : [];
+    movementsData = movementsData.map(m => ({
+        date: new Date(m.date),
+        type: m.type,
+        quantity: parseInt(m.quantity) || 0
+    }));
 
     // Configuration des couleurs
     const chartColors = {
@@ -214,20 +224,24 @@ function initCharts(data) {
 // Ajouter des animations pour les mouvements
 function displayMovements(movements) {
     const movementList = document.getElementById('movementList');
-    movementList.innerHTML = ''; // Clear existing items
+    if (!movementList || !Array.isArray(movements)) return;
 
+    movementList.innerHTML = '';
     movements.forEach((mov, index) => {
+        if (!mov.date || !mov.type || !mov.quantity) return;
+
         const item = document.createElement('div');
         item.className = 'movement-item';
-        item.style.opacity = '0';
-        item.style.transform = 'translateY(20px)';
+        const date = new Date(mov.date);
+        if (isNaN(date.getTime())) return;
+
         item.innerHTML = `
             <div class="movement-icon ${mov.type === 'in' ? 'in' : 'out'}">
                 ${mov.type === 'in' ? '↑' : '↓'}
             </div>
             <div class="movement-details">
                 <span class="movement-quantity">${mov.quantity} unités</span>
-                <span class="movement-date">${new Date(mov.date).toLocaleDateString()}</span>
+                <span class="movement-date">${date.toLocaleDateString()}</span>
             </div>
         `;
         movementList.appendChild(item);

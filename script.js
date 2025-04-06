@@ -102,20 +102,32 @@ function updateCurrentTime() {
 
 // Améliorer l'initialisation des graphiques
 function initCharts(data) {
-    // Vérifier et convertir les données d'historique
-    let historyData = Array.isArray(data.history) ? data.history : [];
-    historyData = historyData.map(h => ({
-        date: new Date(h.date),
-        quantity: parseInt(h.quantity) || 0
-    }));
+    // Vérification et préparation des données
+    console.log("Data received:", data); // Debug log
 
-    // Vérifier et convertir les données de mouvements
-    let movementsData = Array.isArray(data.movements) ? data.movements : [];
-    movementsData = movementsData.map(m => ({
-        date: new Date(m.date),
-        type: m.type,
-        quantity: parseInt(m.quantity) || 0
-    }));
+    // Convertir et valider les données d'historique
+    let historyData = [];
+    try {
+        historyData = Array.isArray(data.history) ? data.history : [];
+        historyData = historyData.map(h => ({
+            date: new Date(h.date),
+            quantity: parseInt(h.quantity) || 0
+        }));
+    } catch (e) {
+        console.error("Error parsing history data:", e);
+        historyData = [];
+    }
+
+    // Convertir et valider les données de la courbe de stock
+    let stockCurveData = [];
+    try {
+        stockCurveData = Array.isArray(data.stock_curve) ? 
+            data.stock_curve.map(Number) : 
+            historyData.map(h => h.quantity);
+    } catch (e) {
+        console.error("Error parsing stock curve data:", e);
+        stockCurveData = [];
+    }
 
     // Configuration des couleurs
     const chartColors = {
@@ -230,17 +242,16 @@ function initCharts(data) {
                 labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
                 datasets: [{
                     data: [
-                        data.current,
-                        data.min,
-                        Math.max(0, data.max - data.current)
+                        data.current || 0,
+                        data.min || 0,
+                        Math.max(0, (data.max || 0) - (data.current || 0))
                     ],
                     backgroundColor: [
-                        '#1976d2',  // Bleu pour stock actuel
-                        '#f44336',  // Rouge pour minimum
-                        '#4CAF50'   // Vert pour disponible
+                        '#1976d2',
+                        '#f44336',
+                        '#4CAF50'
                     ],
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.5)'
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -250,21 +261,14 @@ function initCharts(data) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#333',
                             padding: 20,
-                            font: {
-                                size: 12
-                            }
+                            font: { size: 12 }
                         }
                     },
                     title: {
                         display: true,
-                        text: 'Répartition du Stock',
-                        color: '#333',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        }
+                        text: `Répartition du Stock - ${data.category || 'Non catégorisé'}`,
+                        font: { size: 16, weight: 'bold' }
                     }
                 }
             }
@@ -274,128 +278,60 @@ function initCharts(data) {
     // Graphique des tendances
     const trendsCtx = document.getElementById('categoryTrendsChart');
     if (trendsCtx) {
-        // Préparer les données d'historique
-        const historyData = data.history || [];
-        const dates = historyData.map(h => new Date(h.date));
-        const quantities = historyData.map(h => h.quantity);
+        // Générer des dates pour l'axe X
+        const dates = Array.from({length: stockCurveData.length}, (_, i) => {
+            let date = new Date();
+            date.setDate(date.getDate() - (stockCurveData.length - i - 1));
+            return date;
+        });
 
         new Chart(trendsCtx, {
             type: 'line',
             data: {
                 labels: dates,
                 datasets: [{
-                    label: 'Niveau de stock',
-                    data: quantities,
+                    label: 'Évolution du stock',
+                    data: stockCurveData,
                     borderColor: '#1976d2',
                     backgroundColor: 'rgba(25, 118, 210, 0.1)',
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 5,                    // Augmenter la taille des points
-                    pointHoverRadius: 8,              // Augmenter la taille au survol
-                    borderWidth: 3,                   // Augmenter l'épaisseur de la ligne
-                    pointBackgroundColor: '#ffffff',  // Points blancs
-                    pointBorderColor: '#1976d2'      // Bordure bleue pour les points
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    borderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#333',
-                            padding: 20,
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        }
-                    },
                     title: {
                         display: true,
                         text: 'Évolution du Stock',
-                        color: '#333',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    }
+                        padding: 20,
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: { display: false }
                 },
                 scales: {
                     x: {
                         type: 'time',
                         time: {
                             unit: 'day',
-                            displayFormats: {
-                                day: 'DD/MM'
-                            }
+                            displayFormats: { day: 'DD/MM' }
                         },
                         grid: {
                             display: true,
-                            color: 'rgba(0, 0, 0, 0.1)',
-                            drawBorder: true
-                        },
-                        title: {
-                            display: true,
-                            text: 'Date',
-                            color: '#666',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        },
-                        ticks: {
-                            color: '#666',
-                            font: {
-                                size: 12
-                            }
+                            color: 'rgba(0, 0, 0, 0.1)'
                         }
                     },
                     y: {
                         beginAtZero: true,
                         grid: {
                             display: true,
-                            color: 'rgba(0, 0, 0, 0.1)',
-                            drawBorder: true
-                        },
-                        title: {
-                            display: true,
-                            text: 'Quantité en stock',
-                            color: '#666',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        },
-                        ticks: {
-                            color: '#666',
-                            font: {
-                                size: 12
-                            },
-                            stepSize: 1  // Pour avoir des nombres entiers
+                            color: 'rgba(0, 0, 0, 0.1)'
                         }
                     }
-                },
-                elements: {
-                    line: {
-                        tension: 0.4,  // Courbe plus lisse
-                        borderWidth: 3  // Ligne plus épaisse
-                    },
-                    point: {
-                        radius: 5,  // Points plus gros
-                        hoverRadius: 8,
-                        borderWidth: 2
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
                 }
             }
         });

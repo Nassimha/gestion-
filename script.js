@@ -221,23 +221,33 @@ function initCharts(data) {
         }
     });
 
-    // Nouveau graphique pour l'analyse par catégorie
+    // Avant de créer le graphique de catégorie, assurons-nous d'avoir les données
+    let stockCurveData = [];
+    try {
+        stockCurveData = Array.isArray(data.stock_curve) ? data.stock_curve.map(Number) : [];
+    } catch (e) {
+        console.error('Erreur lors du parsing de stock_curve:', e);
+        stockCurveData = [];
+    }
+
+    // Créer des données pour le donut chart
     const categoryCtx = document.getElementById('categoryStockChart').getContext('2d');
-    new Chart(categoryCtx, {
+    const categoryChart = new Chart(categoryCtx, {
         type: 'doughnut',
         data: {
             labels: ['Stock actuel', 'Stock minimum', 'Stock disponible'],
             datasets: [{
                 data: [
-                    data.current,
-                    data.min,
-                    Math.max(0, data.max - data.current)
+                    data.current || 0,
+                    data.min || 0,
+                    Math.max(0, (data.max || 0) - (data.current || 0))
                 ],
                 backgroundColor: [
-                    '#1976d2',
-                    '#f44336',
-                    '#4CAF50'
-                ]
+                    '#1976d2',  // Bleu pour stock actuel
+                    '#f44336',  // Rouge pour minimum
+                    '#4CAF50'   // Vert pour disponible
+                ],
+                borderWidth: 1
             }]
         },
         options: {
@@ -245,7 +255,11 @@ function initCharts(data) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Répartition du Stock'
+                    text: `Répartition du Stock - ${data.category || 'Non catégorisé'}`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
                 },
                 legend: {
                     position: 'bottom'
@@ -254,12 +268,18 @@ function initCharts(data) {
         }
     });
 
-    // Graphique des tendances par catégorie
+    // Graphique des tendances avec les données de l'historique
     const trendsCtx = document.getElementById('categoryTrendsChart').getContext('2d');
-    new Chart(trendsCtx, {
+    const dates = stockCurveData.map((_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (stockCurveData.length - index - 1));
+        return date;
+    });
+
+    const trendsChart = new Chart(trendsCtx, {
         type: 'line',
         data: {
-            labels: Array.from({length: stockCurveData.length}, (_, i) => i + 1),
+            labels: dates,
             datasets: [{
                 label: 'Évolution du stock',
                 data: stockCurveData,
@@ -274,7 +294,15 @@ function initCharts(data) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Tendances de la Catégorie'
+                    text: `Tendances - ${data.category || 'Non catégorisé'}`,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
                 }
             },
             scales: {
@@ -283,40 +311,44 @@ function initCharts(data) {
                     time: {
                         unit: 'day',
                         displayFormats: {
-                            day: 'DD/MM/YY'
+                            day: 'DD/MM'
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
                     }
                 },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantité'
+                    }
                 }
             }
         }
     });
 
-    // Mise à jour des métriques de catégorie
     updateCategoryMetrics(data);
 }
 
 function updateCategoryMetrics(data) {
-    // Calculer et afficher les métriques de la catégorie
-    const categoryTotalStock = document.getElementById('categoryTotalStock');
-    const categoryAvgConsumption = document.getElementById('categoryAvgConsumption');
-    const categoryStockout = document.getElementById('categoryStockout');
+    const metrics = {
+        categoryTotalStock: `${data.current || 0} unités`,
+        categoryAvgConsumption: `${calculateAverageConsumption(data)} unités/jour`,
+        categoryStockout: `${calculateDaysUntilCritical(data)} jours`
+    };
 
-    if (categoryTotalStock) {
-        categoryTotalStock.textContent = `${data.current} unités`;
-    }
-
-    if (categoryAvgConsumption) {
-        const avgConsumption = calculateAverageConsumption(data);
-        categoryAvgConsumption.textContent = `${avgConsumption} unités/jour`;
-    }
-
-    if (categoryStockout) {
-        const daysUntilCritical = calculateDaysUntilCritical(data);
-        categoryStockout.textContent = `${daysUntilCritical} jours`;
-    }
+    Object.entries(metrics).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            // Ajouter une classe d'animation
+            element.classList.add('updated');
+            setTimeout(() => element.classList.remove('updated'), 1000);
+        }
+    });
 }
 
 // Ajouter des animations pour les mouvements
